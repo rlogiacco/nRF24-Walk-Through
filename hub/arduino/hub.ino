@@ -18,21 +18,16 @@ RF24 radio(9, 10);
 void setup() {
 	SERIAL_DEBUG_SETUP(9600);
 
-	// Starts the transciever
+	// Initialize the transceiver
 	radio.begin();
-	// Enables auto ack
-	radio.setAutoAck(true);
-	// Enables payload in ack packet
-	radio.enableAckPayload();
+	radio.setAutoAck(true);        // Enables auto ack: this is true by default, but better to be explicit
+	radio.enableAckPayload();      // Enables payload in ack packets
+	radio.setRetries(1, 15);       // Sets 15 retries, each every 0.5ms, useful with ack payload
+	radio.setPayloadSize(2);       // Sets the payload size to 2 bytes
+	radio.setDataRate(RF24_2MBPS); // Sets fastest data rate, useful with ack payload
 
-	// Sets 15 retries, each every 0.5ms, useful with ack payload
-	radio.setRetries(1, 15);
-	// Sets the payload size to 2 bytes
-	radio.setPayloadSize(2);
-	// Sets fastest data rate, useful with ack payload
-	radio.setDataRate(RF24_2MBPS);
-
-	// Opens the first input pipe on the hub address
+	// Opens the first input pipe on the hub address, this allows
+	// the hub to receive packets transmitted to the hub address
 	radio.openReadingPipe(1, ADDR_FAMILY);
 
 	// Puts the transceiver into receive mode
@@ -81,10 +76,10 @@ void loop() {
 		// hub can reply back to the transmitting node
 		sendNodeCount(nodeId);
 
-		DEBUG("Got event from node %c, click count is %u", nodeId + 64, counters[nodeId]);
-
 		// Prepare the next ack packet payload
 		radio.writeAckPayload(1, &next, 2);
+
+		DEBUG("Got event from node %c, click count is %u", nodeId + 64, counters[nodeId]);
 	}
 
 	// Check if its time to print out the report
@@ -94,6 +89,10 @@ void loop() {
 	}
 }
 
+/**
+ * This function is executed periodically to print out the report
+ * and reset all the counters.
+ */
 void reset() {
 	DEBUG("Received %u clicks in the past %i second(s)", next - 1, INTERVAL);
 	for (int i = 0; i < MAX_ID_VALUE; i++) {
@@ -113,7 +112,7 @@ void reset() {
 	radio.stopListening();
 	radio.startListening();
 
-	// Prepare the next ack packet payload
+	// Reset the ack packet payload
 	radio.writeAckPayload(1, &next, 2);
 }
 
@@ -124,13 +123,15 @@ void sendNodeCount(const byte nodeId) {
 	// Sets the destination address to the node address
 	radio.openWritingPipe(ADDR_FAMILY + nodeId);
 
-	// Let the node switch transceiver mode to receive
+	// Allow the node to switch transceiver into receive mode
+	// before initiating the transmission.
 	delay(50);
 
-	// Send node count
+	// Send node count back to originating node
 	boolean write = radio.write(&counters[nodeId], 2);
 
 	// Put transceiver back into receive mode
 	radio.startListening();
+
 	DEBUG("Sending of counter %u to node %c was %s", counters[nodeId], 64 + nodeId, write ? "successful" : "UNSUCCESSFUL");
 }

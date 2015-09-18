@@ -28,7 +28,6 @@ byte nodeId = 255;
 void setup() {
 	SERIAL_DEBUG_SETUP(9600);
 
-
 	// Setup the push button
 	pinMode(BUTTON_PIN, INPUT_PULLUP);
 
@@ -41,19 +40,13 @@ void setup() {
 
 		DEBUG("Node identifier is %c", nodeId + 64);
 
-		// Starts the transciever
+		// Initialize the transceiver
 		radio.begin();
-		// Enables auto ack
-		radio.setAutoAck(true);
-		// Enables payload in ack packet
-		radio.enableAckPayload();
-
-		// Sets 15 retries, each every 0.5ms, useful with ack payload
-		radio.setRetries(1, 15);
-		// Sets the payload size to 2 bytes
-		radio.setPayloadSize(2);
-		// Sets fastest data rate, useful with ack payload
-		radio.setDataRate(RF24_2MBPS);
+		radio.setAutoAck(true);        // Enables auto ack: this is true by default, but better to be explicit
+		radio.enableAckPayload();      // Enables payload in ack packets
+		radio.setRetries(1, 15);       // Sets 15 retries, each every 0.5ms, useful with ack payload
+		radio.setPayloadSize(2);       // Sets the payload size to 2 bytes
+		radio.setDataRate(RF24_2MBPS); // Sets fastest data rate, useful with ack payload
 
 		// Opens the first input pipe on this node address
 		radio.openReadingPipe(1, ADDR_FAMILY + nodeId);
@@ -82,31 +75,31 @@ void loop() {
 	// Checks if we are trying to configure the node identifier
 	config();
 
-	delay(1);
-	// Checks the push button
+	delay(1); // Slow down a bit the MCU
+
+	// Checks the push button: if we enter here the button has been pressed
 	if (DFE(digitalRead(BUTTON_PIN), buttonStatus)) {
 
-		// Sets the destination address for packets to the hub address
+		// Sets the destination address for transmitted packets to the hub address
 		radio.openWritingPipe(ADDR_FAMILY);
 
 		// Put transceiver in transmit mode
 		radio.stopListening();
 
-		// If we are here the button has been pressed: send our id to notify the event
+		// Transmit this node id to the hub
 		bool write = radio.write(&nodeId, 1);
+
 		DEBUG("Send attempt from node %c was %s", nodeId + 64, write ? "successful" : "UNSUCCESSFUL");
 
-		if (write) {
-			// Get acknowledge packet payload from the hub
-			while (radio.available()) {
-				unsigned int count;
-				radio.read(&count, 2);
-				DEBUG("Got response from hub: total click count is %u", count);
-			}
-
-			// This function shows how a node can receive data from the hub
-			receiveNodeCount();
+		// Get acknowledge packet payload from the hub
+		while (write && radio.available()) {
+			unsigned int count;
+			radio.read(&count, 2);
+			DEBUG("Got response from hub: total click count is %u", count);
 		}
+
+		// This function shows how a node can receive data from the hub
+		receiveNodeCount();
 	}
 }
 
