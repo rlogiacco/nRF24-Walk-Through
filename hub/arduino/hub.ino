@@ -59,7 +59,10 @@ unsigned int counters[MAX_ID_VALUE];
 unsigned int next;
 
 void loop() {
-	// Checks if the transceiver has received any packet
+
+	// Checks if the transceiver has received any packet: when this
+	// statement returns true the ack packet payload has been
+	// already sent out
 	if (radio.available()) {
 
 		// Prepare the next ack packet payload
@@ -71,8 +74,10 @@ void loop() {
 		// Read the node id from the reading pipe
 		radio.read(&nodeId, 1);
 
-		// Update the node counter and total counter
+		// Update the node counter
 		counters[nodeId] = counters[nodeId] + 1;
+
+		sendCountBack(nodeId);
 
 		DEBUG("Got event from node %c, click count is %u", nodeId + 64, counters[nodeId]);
 
@@ -108,4 +113,22 @@ void reset() {
 
 	// Prepare the next ack packet payload
 	radio.writeAckPayload(1, &next, 2);
+}
+
+void sendCountBack(const byte nodeId) {
+	// Put transceiver into transmit mode
+	radio.stopListening();
+
+	// Sets the destination address to the node address
+	radio.openWritingPipe(ADDR_FAMILY + nodeId);
+
+	// Let the node switch transceiver mode to receive
+	delay(50);
+
+	// Send node count
+	boolean write = radio.write(&counters[nodeId], 2);
+
+	// Put transceiver back into receive mode
+	radio.startListening();
+	DEBUG("Sending of counter %u to node %c was %s", counters[nodeId], 64 + nodeId, write ? "successful" : "UNSUCCESSFUL");
 }

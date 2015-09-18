@@ -50,18 +50,13 @@ void setup() {
 
 		// Sets 15 retries, each every 0.5ms, useful with ack payload
 		radio.setRetries(1, 15);
-		// Sets the payload size to 1 byte
+		// Sets the payload size to 2 bytes
 		radio.setPayloadSize(2);
 		// Sets fastest data rate, useful with ack payload
 		radio.setDataRate(RF24_2MBPS);
-		// Sets the destination address for packets to the hub address
-		radio.openWritingPipe(ADDR_FAMILY);
 
 		// Opens the first input pipe on this node address
 		radio.openReadingPipe(1, ADDR_FAMILY + nodeId);
-
-		// Put transceiver in transmit mode
-		radio.stopListening();
 
 #if (SERIAL_DEBUG)
 		// Sends current configuration on serial
@@ -91,20 +86,47 @@ void loop() {
 	// Checks the push button
 	if (DFE(digitalRead(BUTTON_PIN), buttonStatus)) {
 
+		// Sets the destination address for packets to the hub address
+		radio.openWritingPipe(ADDR_FAMILY);
+
+		// Put transceiver in transmit mode
+		radio.stopListening();
+
 		// If we are here the button has been pressed: send our id to notify the event
 		bool write = radio.write(&nodeId, 1);
 		DEBUG("Send attempt from node %c was %s", nodeId + 64, write ? "successful" : "UNSUCCESSFUL");
 
 		if (write) {
-			delay(10);
-
 			// Get acknowledge packet payload from the hub
 			while (radio.available()) {
 				unsigned int count;
 				radio.read(&count, 2);
 				DEBUG("Got response from hub: total click count is %u", count);
 			}
+
+			receiveCount();
 		}
+	}
+}
+
+#define TIMEOUT 200
+void receiveCount() {
+
+	unsigned long time = millis();
+	bool timeout = false;
+	// Put transceiver in receive mode
+	radio.startListening();
+
+	while (!timeout && !radio.available()) {
+		timeout = millis() - time > TIMEOUT;
+	}
+
+	if (timeout) {
+		DEBUG("No hub response packet received within %u ms", TIMEOUT);
+	} else {
+		unsigned int count = 0;
+		radio.read(&count, 2);
+		DEBUG("Hub response packet received with value %u", count);
 	}
 }
 
