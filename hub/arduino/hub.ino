@@ -3,11 +3,11 @@
 #include "RF24.h"
 #include "printf.h"
 
-// enables/disable serial debugging
+// Enables/disables serial debugging
 #define SERIAL_DEBUG true
 #include <FormattingSerialDebug.h>
 
-// creates a new instance using SPI plus pins 9 and 10
+// Creates a new instance using SPI plus pins 9 and 10
 RF24 radio(9, 10);
 
 // nRF24 address family: all addresses will be in the format 0xFACEC0DE## with the last two
@@ -34,7 +34,7 @@ void setup() {
 	radio.startListening();
 
 #if (SERIAL_DEBUG)
-	// Sends current configuration on serial
+	// Prints current configuration on serial
 	radio.printDetails();
 #endif
 

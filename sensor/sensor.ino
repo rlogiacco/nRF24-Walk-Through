@@ -4,11 +4,11 @@
 #include "RF24.h"
 #include "printf.h"
 
-// enables/disable serial debugging
+// Enables/disables serial debugging
 #define SERIAL_DEBUG true
 #include <FormattingSerialDebug.h>
 
-// creates a new instance using SPI plus pins 9 and 10
+// Creates a new instance using SPI plus pins 9 and 10
 RF24 radio(9, 10);
 
 // Where in EEPROM is the address stored?
@@ -52,7 +52,7 @@ void setup() {
 		radio.openReadingPipe(1, ADDR_FAMILY + nodeId);
 
 #if (SERIAL_DEBUG)
-		// Sends current configuration on serial
+		// Prints current configuration on serial
 		radio.printDetails();
 #endif
 	} else {
