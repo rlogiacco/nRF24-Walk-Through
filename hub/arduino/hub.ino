@@ -77,11 +77,13 @@ void loop() {
 		// Update the node counter
 		counters[nodeId] = counters[nodeId] + 1;
 
-		sendCountBack(nodeId);
+		// Send the node counter to the originating node showing how the
+		// hub can reply back to the transmitting node
+		sendNodeCount(nodeId);
 
 		DEBUG("Got event from node %c, click count is %u", nodeId + 64, counters[nodeId]);
 
-		// prepare the next ack packet payload
+		// Prepare the next ack packet payload
 		radio.writeAckPayload(1, &next, 2);
 	}
 
@@ -115,7 +117,7 @@ void reset() {
 	radio.writeAckPayload(1, &next, 2);
 }
 
-void sendCountBack(const byte nodeId) {
+void sendNodeCount(const byte nodeId) {
 	// Put transceiver into transmit mode
 	radio.stopListening();
 

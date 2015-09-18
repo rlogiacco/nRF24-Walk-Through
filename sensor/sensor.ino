@@ -104,13 +104,19 @@ void loop() {
 				DEBUG("Got response from hub: total click count is %u", count);
 			}
 
-			receiveCount();
+			// This function shows how a node can receive data from the hub
+			receiveNodeCount();
 		}
 	}
 }
 
+/*
+ * This function switches the transceiver into receive mode
+ * and waits up to TIMEOUT milliseconds for a reply packet
+ * containing the click count for this node from the hub.
+ */
 #define TIMEOUT 200
-void receiveCount() {
+void receiveNodeCount() {
 
 	unsigned long time = millis();
 	bool timeout = false;
