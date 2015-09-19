@@ -95,12 +95,13 @@ void loop() {
 		while (write && radio.available()) {
 			unsigned int count;
 			radio.read(&count, 2);
+
+			// This function shows how a node can receive data from the hub
+			// without using ack packets payload
+			receiveNodeCount();
+
 			DEBUG("Got response from hub: total click count is %u", count);
 		}
-
-		// This function shows how a node can receive data from the hub
-		// without using ack packets payload
-		receiveNodeCount();
 	}
 }
 
@@ -153,8 +154,8 @@ void config() {
 			uint16_t reading = atoi(buffer);
 			if (reading > 0 && reading <= MAX_ID_VALUE) {
 				nodeId = (uint8_t) reading;
-				DEBUG("Setting node identifier to %c and resetting the transceiver", nodeId + 64);
 				EEPROM.write(EEPROM_ADDR, nodeId);
+				DEBUG("Setting node identifier to %c and resetting the transceiver", nodeId + 64);
 				setup();
 			} else {
 				DEBUG("Invalid node identifier %u (must be greater than 0 and lesser than %u)", reading, MAX_ID_VALUE + 1);

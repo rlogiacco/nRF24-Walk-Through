@@ -34,6 +34,7 @@ void setup() {
 	radio.startListening();
 
 #if (SERIAL_DEBUG)
+	while(!Serial.available()) delay(100);
 	// Prints current configuration on serial
 	radio.printDetails();
 #endif
@@ -98,6 +99,7 @@ void reset() {
 	for (int i = 0; i < MAX_ID_VALUE; i++) {
 		if (counters[i] > 0) {
 			DEBUG("* %u click(s) from node %c", counters[i], i + 64);
+			delay(25);
 		}
 
 		// Reset the node counter
