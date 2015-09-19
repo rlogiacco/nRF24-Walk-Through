@@ -1,0 +1,8 @@
+/Release/
+/arduino/
+/Libraries/
+/spec.d
+/.ino.cpp
+/.settings
+/.project
+/.cproject

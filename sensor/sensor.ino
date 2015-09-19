@@ -99,6 +99,7 @@ void loop() {
 		}
 
 		// This function shows how a node can receive data from the hub
+		// without using ack packets payload
 		receiveNodeCount();
 	}
 }
