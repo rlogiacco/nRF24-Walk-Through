@@ -34,7 +34,6 @@ void setup() {
 	radio.startListening();
 
 #if (SERIAL_DEBUG)
-	while(!Serial.available()) delay(100);
 	// Prints current configuration on serial
 	radio.printDetails();
 #endif
