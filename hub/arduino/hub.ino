@@ -42,7 +42,7 @@ void setup() {
 }
 
 #define SECOND 1000
-#define INTERVAL 10
+#define INTERVAL 30
 
 // Holds the last time we have reset the counters
 unsigned long last;
