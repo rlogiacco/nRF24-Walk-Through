@@ -15,6 +15,10 @@ RF24 radio(9, 10);
 #define ADDR_FAMILY 0xFACEC0DE00LL
 #define MAX_ID_VALUE 26
 
+// LED pin and pulse duration
+#define LED_PIN 7
+#define LED_PULSE 100
+
 void setup() {
 	SERIAL_DEBUG_SETUP(57600);
 
@@ -38,6 +42,8 @@ void setup() {
 	radio.printDetails();
 #endif
 
+	// Enables LED pin as OUTPUT
+	pinMode(LED_PIN, OUTPUT);
 	reset();
 }
 
@@ -75,6 +81,11 @@ void loop() {
 
 		// Prepare the next ack packet payload
 		radio.writeAckPayload(1, &(++next), 2);
+
+		// Pulse the LED
+		digitalWrite(LED_PIN, HIGH);
+		delay(LED_PULSE);
+		digitalWrite(LED_PIN, LOW);
 
 		DEBUG("Got event from node %c, click count is %u", nodeId + 64, counters[nodeId]);
 	}
