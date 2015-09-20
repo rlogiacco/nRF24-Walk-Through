@@ -16,7 +16,7 @@ RF24 radio(9, 10);
 #define MAX_ID_VALUE 26
 
 void setup() {
-	SERIAL_DEBUG_SETUP(9600);
+	SERIAL_DEBUG_SETUP(57600);
 
 	// Initialize the transceiver
 	radio.begin();
@@ -60,9 +60,6 @@ void loop() {
 	// already sent out
 	if (radio.available()) {
 
-		// Prepare the next ack packet payload
-		next++;
-
 		// This will store the node id
 		byte nodeId = 0;
 
@@ -77,7 +74,7 @@ void loop() {
 		sendNodeCount(nodeId);
 
 		// Prepare the next ack packet payload
-		radio.writeAckPayload(1, &next, 2);
+		radio.writeAckPayload(1, &(++next), 2);
 
 		DEBUG("Got event from node %c, click count is %u", nodeId + 64, counters[nodeId]);
 	}
@@ -94,24 +91,25 @@ void loop() {
  * and reset all the counters.
  */
 void reset() {
-	DEBUG("Received %u clicks in the past %i second(s)", next - 1, INTERVAL);
+	unsigned int total = next - 1;
+
+	DEBUG("Received %u clicks in the past %i second(s)", total, INTERVAL);
 	for (int i = 0; i < MAX_ID_VALUE; i++) {
 		if (counters[i] > 0) {
 			DEBUG("* %u click(s) from node %c", counters[i], i + 64);
-			delay(25);
 		}
 
 		// Reset the node counter
 		counters[i] = 0;
 	}
 
-	// Reset the total click counter
-	next = 1;
-
 	// Clear the pending ack packet payload: without this
 	// the last ack payload will remain in the ack packets queue.
 	radio.stopListening();
 	radio.startListening();
+
+	// Reset the total click counter: next is always 1 click ahead
+	next = 1;
 
 	// Reset the ack packet payload
 	radio.writeAckPayload(1, &next, 2);
