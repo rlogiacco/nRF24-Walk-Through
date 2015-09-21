@@ -53,8 +53,6 @@ void setup() {
 
 		// Opens the first input pipe on this node address
 		radio.openReadingPipe(2, ADDR_FAMILY + 254);
-		// Put transceiver in transmit mode
-		radio.startListening();
 #if (SERIAL_DEBUG)
 		// Prints current configuration on serial
 		radio.printDetails();
