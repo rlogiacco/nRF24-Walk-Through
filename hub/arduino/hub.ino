@@ -34,9 +34,6 @@ void setup() {
 	// the hub to receive packets transmitted to the hub address
 	radio.openReadingPipe(1, ADDR_FAMILY);
 
-	// Puts the transceiver into receive mode
-	radio.startListening();
-
 #if (SERIAL_DEBUG)
 	// Prints current configuration on serial
 	radio.printDetails();
@@ -44,6 +41,8 @@ void setup() {
 
 	// Enables LED pin as OUTPUT
 	pinMode(LED_PIN, OUTPUT);
+
+	// Initialize counters and ack packet payload
 	reset();
 }
 
@@ -100,6 +99,8 @@ void loop() {
 /**
  * This function is executed periodically to print out the report
  * and reset all the counters.
+ * The last ack packet payload is removed from the queue and a new one with
+ * the correct value is pushed in preparation to an event notification.
  */
 void reset() {
 	unsigned int total = next - 1;
