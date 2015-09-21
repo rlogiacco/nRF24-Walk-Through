@@ -44,7 +44,7 @@ void setup() {
 		radio.begin();
 		radio.setAutoAck(true);        // Enables auto ack: this is true by default, but better to be explicit
 		radio.enableAckPayload();      // Enables payload in ack packets
-		radio.setRetries(2, 15);       // Sets 15 retries, each every 0.5ms, useful with ack payload
+		radio.setRetries(1, 15);       // Sets 15 retries, each every 0.5ms, useful with ack payload
 		radio.setPayloadSize(2);       // Sets the payload size to 2 bytes
 		radio.setDataRate(RF24_2MBPS); // Sets fastest data rate, useful with ack payload
 
